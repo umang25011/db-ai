@@ -1,0 +1,32 @@
+# Source files (only dist should be published)
+src/
+*.ts
+!*.d.ts
+
+# Development files
+tsconfig.json
+.git/
+.gitignore
+
+# Test files
+*.test.ts
+*.spec.ts
+
+# Development dependencies
+node_modules/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.local
+
+# User configuration (should not be published)
+.db-ai/
+
