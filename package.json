@@ -1,0 +1,40 @@
+{
+  "name": "db-ai",
+  "version": "1.0.0",
+  "description": "A package to allow AI to access databases with ease using Prisma",
+  "main": "dist/index.js",
+  "bin": {
+    "db-ai": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build",
+    "dev": "tsc --watch",
+    "test:build": "npm run build && echo 'Build successful!'",
+    "test:link": "npm run build && npm link && echo 'Package linked! You can now use db-ai command.'"
+  },
+  "keywords": [
+    "database",
+    "prisma",
+    "ai",
+    "sql",
+    "query"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@prisma/client": "^5.7.1",
+    "chalk": "^4.1.2",
+    "commander": "^11.1.0",
+    "json-stringify-safe": "^5.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.5",
+    "prisma": "^5.7.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
