@@ -4,7 +4,7 @@
   "description": "A package to allow AI to access databases with ease using Prisma",
   "main": "dist/index.js",
   "bin": {
-    "db-ai": "./dist/index.js"
+    "db-ai": "dist/index.js"
   },
   "scripts": {
     "build": "tsc",
@@ -25,7 +25,7 @@
   "homepage": "https://github.com/umang25011/db-ai",
   "repository": {
     "type": "git",
-    "url": "https://github.com/umang25011/db-ai.git"
+    "url": "git+https://github.com/umang25011/db-ai.git"
   },
   "bugs": {
     "url": "https://github.com/umang25011/db-ai/issues"
