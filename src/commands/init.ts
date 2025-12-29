@@ -48,8 +48,13 @@ The \`provider\` field in dbConfig.json specifies your database type:
 - \`sqlite\` - SQLite
 - \`sqlserver\` - SQL Server
 
-**Important**: Make sure to install the required Prisma driver for your database provider.
-For example, if using PostgreSQL, ensure \`@prisma/client\` is installed.
+**Important**: Make sure to install the required database driver package for your database provider:
+- PostgreSQL: \`npm install pg\`
+- MySQL: \`npm install mysql2\`
+- SQLite: \`npm install better-sqlite3\`
+- SQL Server: \`npm install @prisma/adapter-sqlserver\`
+
+Note: \`@prisma/client\` is already included and works with all database providers.
 
 ## OPERATIONS_ALLOWED
 

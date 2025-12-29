@@ -8,12 +8,14 @@ A package to allow AI to access databases with ease using Prisma.
 npm install db-ai
 ```
 
-Make sure to install the required Prisma driver for your database:
+Make sure to install the required database driver for your database provider:
 
-- **PostgreSQL**: `npm install @prisma/client`
-- **MySQL**: `npm install @prisma/client`
-- **SQLite**: `npm install @prisma/client`
-- **SQL Server**: `npm install @prisma/client`
+- **PostgreSQL**: `npm install pg`
+- **MySQL**: `npm install mysql2`
+- **SQLite**: `npm install better-sqlite3`
+- **SQL Server**: `npm install @prisma/adapter-sqlserver`
+
+Note: `@prisma/client` is already included as a dependency and works with all database providers.
 
 ## Quick Start
 
@@ -57,7 +59,7 @@ Edit `.db-ai/dbConfig.json` with your database credentials:
 - `OPERATIONS_ALLOWED`: Array of allowed SQL operations (default: `["SELECT"]`)
 - `outputFileName`: Optional file name for logging query results with timestamps
 
-**Note**: Make sure to install the required Prisma driver for your database provider.
+**Note**: Make sure to install the required database driver package for your database provider (e.g., `pg` for PostgreSQL, `mysql2` for MySQL, `better-sqlite3` for SQLite, `@prisma/adapter-sqlserver` for SQL Server).
 
 ### 3. Pull Database Schema
 
