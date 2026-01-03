@@ -27,6 +27,7 @@ export async function initCommand() {
         user: "your_username",
         password: "your_password",
         database: "your_database",
+        schema: "public",
         OPERATIONS_ALLOWED: ["SELECT"],
         outputFileName: "output.txt"
       };
@@ -55,6 +56,15 @@ The \`provider\` field in dbConfig.json specifies your database type:
 - SQL Server: \`npm install @prisma/adapter-sqlserver\`
 
 Note: \`@prisma/client\` is already included and works with all database providers.
+
+## Schema
+
+The \`schema\` field (optional) specifies the database schema to use. This is particularly useful for PostgreSQL and SQL Server:
+- **PostgreSQL**: Default is \`public\`. You can specify other schemas like \`myschema\`.
+- **SQL Server**: Specify the schema name (e.g., \`dbo\`, \`sales\`).
+- **MySQL/SQLite**: Schema is typically not used, but can be left empty or omitted.
+
+If not specified, the default schema for your database provider will be used.
 
 ## OPERATIONS_ALLOWED
 

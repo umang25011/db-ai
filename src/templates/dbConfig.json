@@ -5,6 +5,7 @@
   "user": "your_username",
   "password": "your_password",
   "database": "your_database",
+  "schema": "public",
   "OPERATIONS_ALLOWED": ["SELECT"],
   "outputFileName": "output.txt"
 }

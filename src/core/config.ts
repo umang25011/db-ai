@@ -11,6 +11,7 @@ export interface DatabaseConfig {
   user: string;
   password: string;
   database: string;
+  schema?: string;
   OPERATIONS_ALLOWED: string[];
   outputFileName?: string;
 }
@@ -61,21 +62,37 @@ export function validateConfig(config: DatabaseConfig): void {
 }
 
 export function getConnectionString(config: DatabaseConfig): string {
-  const { provider, host, port, user, password, database } = config;
+  const { provider, host, port, user, password, database, schema } = config;
   
   switch (provider.toLowerCase()) {
     case 'postgresql':
     case 'postgres':
-      return `postgresql://${user}:${password}@${host}:${port}/${database}`;
+      let postgresUrl = `postgresql://${user}:${password}@${host}:${port}/${database}`;
+      if (schema) {
+        postgresUrl += `?schema=${encodeURIComponent(schema)}`;
+      }
+      return postgresUrl;
     case 'mysql':
-      return `mysql://${user}:${password}@${host}:${port}/${database}`;
+      let mysqlUrl = `mysql://${user}:${password}@${host}:${port}/${database}`;
+      if (schema) {
+        mysqlUrl += `?schema=${encodeURIComponent(schema)}`;
+      }
+      return mysqlUrl;
     case 'sqlite':
       return `file:${database}`;
     case 'sqlserver':
     case 'mssql':
-      return `sqlserver://${host}:${port};database=${database};user=${user};password=${password}`;
+      let sqlserverUrl = `sqlserver://${host}:${port};database=${database};user=${user};password=${password}`;
+      if (schema) {
+        sqlserverUrl += `;schema=${encodeURIComponent(schema)}`;
+      }
+      return sqlserverUrl;
     default:
-      return `${provider}://${user}:${password}@${host}:${port}/${database}`;
+      let defaultUrl = `${provider}://${user}:${password}@${host}:${port}/${database}`;
+      if (schema) {
+        defaultUrl += `?schema=${encodeURIComponent(schema)}`;
+      }
+      return defaultUrl;
   }
 }
 
@@ -89,7 +106,7 @@ export function getPrismaClient(): PrismaClient {
   const config = loadConfig();
   const connectionString = getConnectionString(config);
 
-  // Set DATABASE_URL for Prisma
+  // Set DATABASE_URL for Prisma 7 (required - can't pass url in constructor)
   process.env.DATABASE_URL = connectionString;
 
   // Try to load Prisma Client from the user's project directory
@@ -108,13 +125,9 @@ export function getPrismaClient(): PrismaClient {
     PrismaClientClass = require('@prisma/client').PrismaClient;
   }
 
-  prismaClient = new PrismaClientClass({
-    datasources: {
-      db: {
-        url: connectionString,
-      },
-    },
-  });
+  // Prisma 7: URL must be set via DATABASE_URL environment variable
+  // The constructor no longer accepts datasources.url
+  prismaClient = new PrismaClientClass();
 
   return prismaClient;
 }

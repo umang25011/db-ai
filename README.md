@@ -44,6 +44,7 @@ Edit `.db-ai/dbConfig.json` with your database credentials:
   "user": "your_username",
   "password": "your_password",
   "database": "your_database",
+  "schema": "public",
   "OPERATIONS_ALLOWED": ["SELECT"],
   "outputFileName": "output.txt"
 }
@@ -56,6 +57,7 @@ Edit `.db-ai/dbConfig.json` with your database credentials:
 - `user`: Database username
 - `password`: Database password
 - `database`: Database name
+- `schema`: (Optional) Database schema name. Useful for PostgreSQL (default: `public`) and SQL Server. Can be omitted for MySQL/SQLite.
 - `OPERATIONS_ALLOWED`: Array of allowed SQL operations (default: `["SELECT"]`)
 - `outputFileName`: Optional file name for logging query results with timestamps
 

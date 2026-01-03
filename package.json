@@ -1,6 +1,6 @@
 {
   "name": "db-ai",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "A package to allow AI to access databases with ease using Prisma",
   "main": "dist/index.js",
   "bin": {
@@ -31,14 +31,14 @@
     "url": "https://github.com/umang25011/db-ai/issues"
   },
   "dependencies": {
-    "@prisma/client": "^5.7.1",
+    "@prisma/client": "^6.18.0",
     "chalk": "^4.1.2",
     "commander": "^11.1.0",
     "json-stringify-safe": "^5.0.1"
   },
   "devDependencies": {
     "@types/node": "^20.10.5",
-    "prisma": "^5.7.1",
+    "prisma": "^6.18.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
   },
