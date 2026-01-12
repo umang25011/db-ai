@@ -28,36 +28,37 @@ db-ai init
 ```
 
 This creates a `.db-ai` folder with:
-- `dbConfig.json` - Database configuration file
+- `prisma.config.ts` - Database configuration file (Prisma 7 format)
 - `instructions.md` - Reference guide for AI
 - `Script1.ts` - Template script for running queries
 
 ### 2. Configure Database
 
-Edit `.db-ai/dbConfig.json` with your database credentials:
+Edit `.db-ai/prisma.config.ts` with your database credentials:
 
-```json
-{
-  "provider": "postgresql",
-  "host": "localhost",
-  "port": 5432,
-  "user": "your_username",
-  "password": "your_password",
-  "database": "your_database",
-  "schema": "public",
-  "OPERATIONS_ALLOWED": ["SELECT"],
-  "outputFileName": "output.txt"
-}
+```typescript
+import { defineConfig } from 'prisma/config';
+
+// Prisma configuration (for Prisma 7)
+export default defineConfig({
+  datasource: {
+    url: "postgresql://your_username:your_password@localhost:5432/your_database?schema=public",
+  },
+});
+
+// db-ai specific configuration
+export const dbAiConfig = {
+  OPERATIONS_ALLOWED: ["SELECT"],  // Allowed SQL operations: SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, ALTER
+  outputFileName: "output.txt",  // Optional: file to log query results
+};
 ```
 
 **Configuration Fields:**
-- `provider`: Database type (postgresql, mysql, sqlite, sqlserver, etc.)
-- `host`: Database host
-- `port`: Database port
-- `user`: Database username
-- `password`: Database password
-- `database`: Database name
-- `schema`: (Optional) Database schema name. Useful for PostgreSQL (default: `public`) and SQL Server. Can be omitted for MySQL/SQLite.
+
+**Prisma Config (default export):**
+- `datasource.url`: Database connection URL (required by Prisma 7)
+
+**db-ai Config (dbAiConfig export):**
 - `OPERATIONS_ALLOWED`: Array of allowed SQL operations (default: `["SELECT"]`)
 - `outputFileName`: Optional file name for logging query results with timestamps
 
@@ -135,17 +136,15 @@ Executes a SQL query, returns the result, and prints it to the console.
 
 ## Security
 
-The package validates SQL operations against the `OPERATIONS_ALLOWED` array in the configuration. By default, only `SELECT` operations are allowed. To allow other operations, update `OPERATIONS_ALLOWED` in `dbConfig.json`:
+The package validates SQL operations against the `OPERATIONS_ALLOWED` array in the configuration. By default, only `SELECT` operations are allowed. To allow other operations, update `OPERATIONS_ALLOWED` in `prisma.config.ts`:
 
-```json
-{
-  "OPERATIONS_ALLOWED": ["SELECT", "INSERT", "UPDATE"]
-}
+```typescript
+OPERATIONS_ALLOWED: ["SELECT", "INSERT", "UPDATE"]
 ```
 
 ## Output Logging
 
-If `outputFileName` is specified in `dbConfig.json`, all query results are automatically appended to that file with timestamps. The file is created in the `.db-ai/` folder.
+If `outputFileName` is specified in `prisma.config.ts`, all query results are automatically appended to that file with timestamps. The file is created in the `.db-ai/` folder.
 
 ## Schema File
 
