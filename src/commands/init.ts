@@ -17,74 +17,29 @@ export async function initCommand() {
       console.log(chalk.yellow(`⚠ Directory already exists: ${configDir}`));
     }
 
-    // Create dbConfig.json
-    const configPath = path.join(configDir, 'dbConfig.json');
+    // Create prisma.config.ts
+    const configPath = path.join(configDir, 'prisma.config.ts');
     if (!fs.existsSync(configPath)) {
-      const configTemplate = {
-        provider: "postgresql",
-        host: "localhost",
-        port: 5432,
-        user: "your_username",
-        password: "your_password",
-        database: "your_database",
-        schema: "public",
-        OPERATIONS_ALLOWED: ["SELECT"],
-        outputFileName: "output.txt"
-      };
+      const configContent = `// Prisma 7 configuration file for db-ai
+// Update this file with your database credentials
 
-      const configContent = JSON.stringify(configTemplate, null, 2);
-      
-      // Since JSON doesn't support comments, we'll write a note file instead
-      fs.writeFileSync(configPath, configContent, 'utf-8');
-      
-      // Create a note file about provider
-      const notePath = path.join(configDir, 'CONFIG_NOTES.md');
-      const noteContent = `# Configuration Notes
+import { defineConfig } from 'prisma/config';
 
-## Database Provider
+// Prisma configuration (for Prisma 7)
+export default defineConfig({
+  datasource: {
+    url: "postgresql://your_username:your_password@localhost:5432/your_database?schema=public",
+  },
+});
 
-The \`provider\` field in dbConfig.json specifies your database type:
-- \`postgresql\` - PostgreSQL
-- \`mysql\` - MySQL
-- \`sqlite\` - SQLite
-- \`sqlserver\` - SQL Server
-
-**Important**: Make sure to install the required database driver package for your database provider:
-- PostgreSQL: \`npm install pg\`
-- MySQL: \`npm install mysql2\`
-- SQLite: \`npm install better-sqlite3\`
-- SQL Server: \`npm install @prisma/adapter-sqlserver\`
-
-Note: \`@prisma/client\` is already included and works with all database providers.
-
-## Schema
-
-The \`schema\` field (optional) specifies the database schema to use. This is particularly useful for PostgreSQL and SQL Server:
-- **PostgreSQL**: Default is \`public\`. You can specify other schemas like \`myschema\`.
-- **SQL Server**: Specify the schema name (e.g., \`dbo\`, \`sales\`).
-- **MySQL/SQLite**: Schema is typically not used, but can be left empty or omitted.
-
-If not specified, the default schema for your database provider will be used.
-
-## OPERATIONS_ALLOWED
-
-This array specifies which SQL operations are allowed:
-- \`SELECT\` - Read queries
-- \`INSERT\` - Insert operations
-- \`UPDATE\` - Update operations
-- \`DELETE\` - Delete operations
-- \`CREATE\` - Create table/index operations
-- \`DROP\` - Drop operations
-- \`ALTER\` - Alter table operations
-
-Default is \`["SELECT"]\` for safety.
-
-## outputFileName
-
-If specified, all query results will be appended to this file with timestamps.
-Leave empty or remove this field to disable file logging.
+// db-ai specific configuration
+export const dbAiConfig = {
+  OPERATIONS_ALLOWED: ["SELECT"],  // Allowed SQL operations: SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, ALTER
+  outputFileName: "output.txt",  // Optional: file to log query results
+};
 `;
-      fs.writeFileSync(notePath, noteContent, 'utf-8');
+      
+      fs.writeFileSync(configPath, configContent, 'utf-8');
       
       console.log(chalk.green(`✓ Created configuration file: ${configPath}`));
       console.log(chalk.yellow(`⚠ Please update ${configPath} with your database credentials`));
@@ -110,7 +65,7 @@ Leave empty or remove this field to disable file logging.
 
     console.log(chalk.green('\n✓ Initialization complete!'));
     console.log(chalk.cyan('\nNext steps:'));
-    console.log(chalk.cyan('1. Update .db-ai/dbConfig.json with your database credentials'));
+    console.log(chalk.cyan('1. Update .db-ai/prisma.config.ts with your database credentials'));
     console.log(chalk.cyan('2. Run "db-ai start" to pull your database schema'));
 
   } catch (error: any) {

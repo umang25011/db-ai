@@ -2,7 +2,7 @@ import chalk from 'chalk';
 import { execSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
-import { getConfigDir, getConnectionString, loadConfig } from '../core/config';
+import { getConfigDir, loadConfig } from '../core/config';
 
 export async function startCommand() {
   try {
@@ -11,10 +11,6 @@ export async function startCommand() {
     // Load configuration
     const config = loadConfig();
     const configDir = getConfigDir();
-
-    // Set DATABASE_URL environment variable
-    const connectionString = getConnectionString(config);
-    process.env.DATABASE_URL = connectionString;
 
     // Create Prisma schema file
     const schemaPath = path.join(configDir, 'schema.prisma');
@@ -28,8 +24,7 @@ generator client {
 }
 
 datasource db {
-  provider = "${config.provider}"
-  url      = env("DATABASE_URL")`;
+  provider = "${config.provider}"`;
 
     // Add schema configuration for PostgreSQL and SQL Server if provided
     if (config.schema && (config.provider.toLowerCase() === 'postgresql' || config.provider.toLowerCase() === 'postgres' || config.provider.toLowerCase() === 'sqlserver' || config.provider.toLowerCase() === 'mssql')) {
@@ -42,33 +37,27 @@ datasource db {
     console.log(chalk.green(`✓ Created schema.prisma at ${schemaPath}`));
 
     // Run prisma db pull to introspect the database
+    // Prisma 7 reads datasource.url from prisma.config.ts automatically
     console.log(chalk.blue('Pulling database schema...'));
     try {
       execSync('npx prisma db pull', {
         cwd: configDir,
         stdio: 'inherit',
-        env: {
-          ...process.env,
-          DATABASE_URL: connectionString,
-        },
       });
       console.log(chalk.green('✓ Database schema pulled successfully'));
     } catch (error: any) {
       console.error(chalk.red('Error pulling database schema:'), error.message);
-      console.log(chalk.yellow('Make sure you have the correct database credentials and the database is accessible.'));
+      console.log(chalk.yellow('Make sure you have the correct database credentials in prisma.config.ts and the database is accessible.'));
       throw error;
     }
 
     // Generate Prisma Client
+    // Prisma 7 reads datasource.url from prisma.config.ts automatically
     console.log(chalk.blue('Generating Prisma Client...'));
     try {
       execSync('npx prisma generate', {
         cwd: configDir,
         stdio: 'inherit',
-        env: {
-          ...process.env,
-          DATABASE_URL: connectionString,
-        },
       });
       console.log(chalk.green('✓ Prisma Client generated successfully'));
     } catch (error: any) {

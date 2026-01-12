@@ -17,7 +17,7 @@ export interface DatabaseConfig {
 }
 
 const CONFIG_DIR = '.db-ai';
-const CONFIG_FILE = 'dbConfig.json';
+const CONFIG_FILE = 'prisma.config.ts';
 
 export function getConfigPath(): string {
   return path.join(process.cwd(), CONFIG_DIR, CONFIG_FILE);
@@ -32,28 +32,46 @@ export function loadConfig(): DatabaseConfig {
     );
   }
 
-  const configContent = fs.readFileSync(configPath, 'utf-8');
-  const config = JSON.parse(configContent) as DatabaseConfig;
+  // Dynamically require the prisma.config.ts file
+  // Delete from cache to ensure fresh load
+  delete require.cache[require.resolve(configPath)];
+  const configModule = require(configPath);
+  
+  // Get Prisma config (default export) and db-ai config (named export)
+  const prismaConfig = configModule.default || configModule;
+  const dbAiConfig = configModule.dbAiConfig || {};
+  
+  // Extract database config from prisma.config.ts
+  // datasource.url is handled by Prisma 7 automatically
+  const config: DatabaseConfig = {
+    provider: extractProviderFromUrl(prismaConfig.datasource?.url),
+    host: '', // Not needed - Prisma reads from datasource.url
+    port: 0, // Not needed - Prisma reads from datasource.url
+    user: '', // Not needed - Prisma reads from datasource.url
+    password: '', // Not needed - Prisma reads from datasource.url
+    database: '', // Not needed - Prisma reads from datasource.url
+    schema: undefined, // Not needed - Prisma reads from datasource.url
+    OPERATIONS_ALLOWED: dbAiConfig.OPERATIONS_ALLOWED || ['SELECT'],
+    outputFileName: dbAiConfig.outputFileName,
+  };
 
   validateConfig(config);
   return config;
 }
 
-export function validateConfig(config: DatabaseConfig): void {
-  const requiredFields: (keyof DatabaseConfig)[] = [
-    'provider',
-    'host',
-    'port',
-    'user',
-    'password',
-    'database',
-    'OPERATIONS_ALLOWED',
-  ];
+function extractProviderFromUrl(url?: string): string {
+  if (!url) return 'postgresql';
+  if (url.startsWith('postgresql://') || url.startsWith('postgres://')) return 'postgresql';
+  if (url.startsWith('mysql://')) return 'mysql';
+  if (url.startsWith('sqlite://') || url.startsWith('file:')) return 'sqlite';
+  if (url.startsWith('sqlserver://') || url.startsWith('mssql://')) return 'sqlserver';
+  return 'postgresql';
+}
 
-  for (const field of requiredFields) {
-    if (config[field] === undefined || config[field] === null || config[field] === '') {
-      throw new Error(`Missing required field in config: ${field}`);
-    }
+export function validateConfig(config: DatabaseConfig): void {
+  // Only validate fields that are actually needed
+  if (!config.provider) {
+    throw new Error('Missing required field in config: provider');
   }
 
   if (!Array.isArray(config.OPERATIONS_ALLOWED)) {
@@ -61,40 +79,6 @@ export function validateConfig(config: DatabaseConfig): void {
   }
 }
 
-export function getConnectionString(config: DatabaseConfig): string {
-  const { provider, host, port, user, password, database, schema } = config;
-  
-  switch (provider.toLowerCase()) {
-    case 'postgresql':
-    case 'postgres':
-      let postgresUrl = `postgresql://${user}:${password}@${host}:${port}/${database}`;
-      if (schema) {
-        postgresUrl += `?schema=${encodeURIComponent(schema)}`;
-      }
-      return postgresUrl;
-    case 'mysql':
-      let mysqlUrl = `mysql://${user}:${password}@${host}:${port}/${database}`;
-      if (schema) {
-        mysqlUrl += `?schema=${encodeURIComponent(schema)}`;
-      }
-      return mysqlUrl;
-    case 'sqlite':
-      return `file:${database}`;
-    case 'sqlserver':
-    case 'mssql':
-      let sqlserverUrl = `sqlserver://${host}:${port};database=${database};user=${user};password=${password}`;
-      if (schema) {
-        sqlserverUrl += `;schema=${encodeURIComponent(schema)}`;
-      }
-      return sqlserverUrl;
-    default:
-      let defaultUrl = `${provider}://${user}:${password}@${host}:${port}/${database}`;
-      if (schema) {
-        defaultUrl += `?schema=${encodeURIComponent(schema)}`;
-      }
-      return defaultUrl;
-  }
-}
 
 let prismaClient: PrismaClient | null = null;
 
@@ -102,12 +86,6 @@ export function getPrismaClient(): PrismaClient {
   if (prismaClient) {
     return prismaClient;
   }
-
-  const config = loadConfig();
-  const connectionString = getConnectionString(config);
-
-  // Set DATABASE_URL for Prisma 7 (required - can't pass url in constructor)
-  process.env.DATABASE_URL = connectionString;
 
   // Try to load Prisma Client from the user's project directory
   // This allows the generated client to be used
@@ -125,8 +103,8 @@ export function getPrismaClient(): PrismaClient {
     PrismaClientClass = require('@prisma/client').PrismaClient;
   }
 
-  // Prisma 7: URL must be set via DATABASE_URL environment variable
-  // The constructor no longer accepts datasources.url
+  // Prisma 7: Reads datasource.url from prisma.config.ts automatically
+  // No need to pass it explicitly
   prismaClient = new PrismaClientClass();
 
   return prismaClient;

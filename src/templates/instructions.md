@@ -13,9 +13,9 @@ db-ai run --sql "SELECT * FROM users LIMIT 10"
 This will:
 - Execute the SQL query against the database
 - Return and display the output
-- Automatically log the query and results to the output file (if `outputFileName` is configured in `dbConfig.json`)
+- Automatically log the query and results to the output file (if `outputFileName` is configured in `prisma.config.ts`)
 
-**Important**: All SQL queries that run (whether via CLI or programmatically) are automatically logged to the output file specified in `dbConfig.json` (e.g., `output.txt`) with timestamps, if that configuration exists.
+**Important**: All SQL queries that run (whether via CLI or programmatically) are automatically logged to the output file specified in `prisma.config.ts` (e.g., `output.txt`) with timestamps, if that configuration exists.
 
 ## Available Functions
 
@@ -50,10 +50,11 @@ Refer to this file to understand the database structure before writing queries.
 
 ## Configuration
 
-The configuration file `.db-ai/dbConfig.json` contains:
+The configuration file `.db-ai/db-ai.prisma.ts` contains:
 - Database connection details
 - `OPERATIONS_ALLOWED`: Array of allowed SQL operations (default: `["SELECT"]`)
 - `outputFileName`: Optional file name for logging query results with timestamps
+- `datasource.url`: Prisma 7 datasource connection string
 
 ## Usage in Scripts
 
@@ -71,7 +72,7 @@ const result = await executeQuery("SELECT * FROM table_name");
 ## Important Notes
 
 - **CLI Usage**: You can use `db-ai run --sql "your SQL query"` to execute SQL directly from the command line
-- **Output Logging**: All SQL queries that run (via CLI or programmatically) are automatically logged to the output file specified in `dbConfig.json` (e.g., `output.txt`) with timestamps, if `outputFileName` is configured
+- **Output Logging**: All SQL queries that run (via CLI or programmatically) are automatically logged to the output file specified in `prisma.config.ts` (e.g., `output.txt`) with timestamps, if `outputFileName` is configured
 - **Security**: Only operations listed in `OPERATIONS_ALLOWED` can be executed
 - **Schema Reference**: Always check the schema file (`.db-ai/schema.prisma`) before writing queries to ensure table and column names are correct
 
